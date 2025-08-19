@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Beer Pong Exam.sln"
+    "dotnet.defaultSolution": "Beer Pong Sinbad.sln"
 }

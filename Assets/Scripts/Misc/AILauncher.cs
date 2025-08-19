@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AILauncher : MonoBehaviour
 {
-    public Rigidbody ballPrefab;
     public float baseLaunchForce = 10f; // Multiplier for drag strength
     public float verticalForce = 2f;    // Extra upward boost
     public float maxForce = 30f;        // Clamp max power
@@ -20,16 +19,20 @@ public class AILauncher : MonoBehaviour
     public float maxDragDistanceAI = 5f;
     public float launchDelay = 2f; // seconds before AI launches
 
-    private void Start()
+
+
+    private MainControllerSingleton mainControllerSingleton => MainControllerSingleton.Instance;
+
+    private void OnEnable()
     {
         // AI waits and then launches automatically
         Invoke(nameof(DecideLaunch), launchDelay);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        // Record drag start
         
+
     }
 
     void DecideLaunch()
@@ -38,7 +41,7 @@ public class AILauncher : MonoBehaviour
 
         // AI "pretends" to drag: pick random direction & power
         Vector3 randomDir = new Vector3(
-            Random.Range(-1f, 1f), // random X
+            Random.Range(-0.6f, -0.5f), // throws to the left side of the board
             Random.Range(0.2f, 1f), // mostly upward
             0f
         );
@@ -53,8 +56,9 @@ public class AILauncher : MonoBehaviour
 
     void LaunchBall()
     {
+        Rigidbody ballRB = mainControllerSingleton.Ball.BallRigidbody;
         // Reset ball velocity
-        ballPrefab.velocity = Vector3.zero;
+        ballRB.velocity = Vector3.zero;
 
         // Scale launch force with "AI drag distance"
         float scaledForce = Mathf.Min(dragDistance * baseLaunchForce, maxForce);
@@ -64,20 +68,25 @@ public class AILauncher : MonoBehaviour
         launchVelocity += Vector3.up * verticalForce; // arc boost
 
         // Apply velocity
-        ballPrefab.velocity = launchVelocity;
+        ballRB.velocity = launchVelocity;
     }
 
     public void PingPongBounce()
     {
-        float scaledForce = Mathf.Min(dragDistance * baseLaunchForce, maxForce);
-        Vector3 launchVelocity = direction * scaledForce;
-        launchVelocity += Vector3.up * verticalForce;
-        ballPrefab.velocity = launchVelocity;
-        isLaunched = false;
-        Debug.Log("Is Launched should be disabled");
+        Rigidbody ballRB = mainControllerSingleton.Ball.BallRigidbody;
 
-        // Schedule AI to launch again
-        Invoke(nameof(DecideLaunch), launchDelay);
+        float scaledForce = Mathf.Min(dragDistance * baseLaunchForce, maxForce);
+
+        Vector3 launchVelocity = direction * scaledForce;
+
+        launchVelocity += Vector3.up * verticalForce;
+
+        ballRB.velocity = launchVelocity;
+
+        isLaunched = false;
+
+        mainControllerSingleton.Ball.BouncedOnce(true);
+        //Invoke(nameof(DecideLaunch), launchDelay);
     }
 }
 

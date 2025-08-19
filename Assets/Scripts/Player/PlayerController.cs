@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public Rigidbody ballPrefab;
     public float baseLaunchForce = 10f; // Multiplier for drag strength
     public float verticalForce = 2f;    // Extra upward boost
     public float maxForce = 30f;        // Clamp max power
@@ -15,6 +14,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 dragStartPos;
     private Vector3 direction;
     [SerializeField] private float dragDistance;
+
+    private MainControllerSingleton mainControllerSingleton => MainControllerSingleton.Instance;
 
     void Update()
     {
@@ -43,10 +44,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void LaunchBall()
+    void LaunchBall() // Optimize
     {
+        Rigidbody ballRB = mainControllerSingleton.Ball.BallRigidbody;
         // Reset ball before launch
-        ballPrefab.velocity = Vector3.zero;
+        ballRB.velocity = Vector3.zero;
 
         // Scale launch force with drag distance
         float scaledForce = Mathf.Min(dragDistance * baseLaunchForce, maxForce);
@@ -56,15 +58,20 @@ public class PlayerController : MonoBehaviour
         launchVelocity += Vector3.up * verticalForce; // arc boost
 
         // Apply velocity
-        ballPrefab.velocity = launchVelocity;
+        ballRB.velocity = launchVelocity;
     }
 
     public void PingPongBounce()
     {
+        Rigidbody ballRB = mainControllerSingleton.Ball.BallRigidbody;
+
         float scaledForce = Mathf.Min(dragDistance * baseLaunchForce, maxForce);
+
         Vector3 launchVelocity = direction.normalized * scaledForce;
+
         launchVelocity += Vector3.up * verticalForce;
-        ballPrefab.velocity = launchVelocity;
+        ballRB.velocity = launchVelocity;
         isLaunched = false;
+        mainControllerSingleton.Ball.BouncedOnce(true);
     }
 }
