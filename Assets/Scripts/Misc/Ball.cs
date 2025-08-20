@@ -6,45 +6,43 @@ public class Ball : MonoBehaviour
 {
     public delegate void OnChangeTurn();
     public static event OnChangeTurn onChangeTurn;
-
-    [SerializeField] private PlayerController controller;
-    [SerializeField] private AILauncher aiLauncher;
-
-    [SerializeField] private TurnManager turnManager;
-
     [SerializeField] private Rigidbody ballRigidbody;
     public Rigidbody BallRigidbody => ballRigidbody;
 
     [SerializeField] private bool isBouncedOnce = false;
     public bool IsBouncedOnce => isBouncedOnce;
-
-
     private MainControllerSingleton mainControllerSingleton => MainControllerSingleton.Instance;
 
 
     private void FixedUpdate()
     {
-        if (ballRigidbody.velocity == Vector3.zero && isBouncedOnce)
+        if (ballRigidbody.velocity == Vector3.zero && isBouncedOnce) // Change the turn when the ball stops in the middle of the board
         {
             BouncedOnce(false);
             onChangeTurn?.Invoke();
         }
     }
-    void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision) // Ball collision checker
     {
-        if (collision.gameObject.tag == "table" && (controller.IsLaunched || aiLauncher.IsLaunched))
+        if (collision.gameObject.tag == "table" && (mainControllerSingleton.PlayerController.IsLaunched || mainControllerSingleton.AILauncher.IsLaunched))
         {
-            if (turnManager.CurrentTurn == TurnManager.Turn.Player)
+            if (mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.Player)
             {
-                controller.PingPongBounce();
+                mainControllerSingleton.PlayerController.PingPongBounce();
             }
             else
             {
-                aiLauncher.PingPongBounce();
+                mainControllerSingleton.AILauncher.PingPongBounce();
             }
         }
 
-        if (collision.gameObject.tag == "wall")
+        if (collision.gameObject.tag == "wall2" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.Player) // Change turn when the ball hits the wall of the other side
+        {
+            BouncedOnce(false);
+            onChangeTurn?.Invoke();
+        }
+
+        if (collision.gameObject.tag == "wall1" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.AI) // Change turn when the ball hits the wall of the other side
         {
             BouncedOnce(false);
             onChangeTurn?.Invoke();
@@ -52,23 +50,26 @@ public class Ball : MonoBehaviour
 
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other) // Ball trigger collision Checker
     {
-        if (other.tag == "AICups" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.Player) // Optimize
+        if (other.tag == "AICups" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.Player)
         {
-            mainControllerSingleton.ScoreManager.RemoveCupAndScore(other.gameObject, mainControllerSingleton.TurnManager.CurrentTurn);
-            BouncedOnce(false);
-            onChangeTurn?.Invoke();
+            ScoreCollision(other.gameObject);
 
         }
 
-        if (other.tag == "PlayerCups" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.AI) // Optimize
+        if (other.tag == "PlayerCups" && mainControllerSingleton.TurnManager.CurrentTurn == TurnManager.Turn.AI)
         {
-            mainControllerSingleton.ScoreManager.RemoveCupAndScore(other.gameObject, mainControllerSingleton.TurnManager.CurrentTurn);
-            BouncedOnce(false);
-            onChangeTurn?.Invoke();
+            ScoreCollision(other.gameObject);
         }
 
+    }
+
+    private void ScoreCollision(GameObject other) // Change turn when the player or AI scores. Also removes the cups 
+    {
+        mainControllerSingleton.ScoreManager.RemoveCupAndScore(other.gameObject, mainControllerSingleton.TurnManager.CurrentTurn);
+        BouncedOnce(false);
+        onChangeTurn?.Invoke();
     }
 
     public void BouncedOnce(bool bounced)

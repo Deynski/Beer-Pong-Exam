@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class TurnManager : MonoBehaviour
 {
-    // Start is called before the first frame update
     [SerializeField] private Turn currentTurn = Turn.Player;
     [SerializeField] private Transform playerSpawnPosition;
     [SerializeField] private Transform aiSpawnPosition;
@@ -15,9 +14,8 @@ public class TurnManager : MonoBehaviour
 
     private MainControllerSingleton mainControllerSingleton => MainControllerSingleton.Instance;
 
-    private void Start() // Temporary
+    private void Start() // AI goes first
     {
-        //ball.transform.position = aiSpawnPosition.position;
         mainControllerSingleton.Ball.transform.position = aiSpawnPosition.position;
     }
 
@@ -31,35 +29,33 @@ public class TurnManager : MonoBehaviour
         Ball.onChangeTurn -= ChangeTurn;
     }
 
-    private void ChangeTurn()
+    private void ChangeTurn() // Change the turn of the game
     {
         mainControllerSingleton.Ball.StopBall();
-        if (currentTurn == Turn.Player) // Optimize
+        if (currentTurn == Turn.Player) 
         {
-            currentTurn = Turn.AI;
-            mainControllerSingleton.Ball.transform.position = aiSpawnPosition.position;
-            mainControllerSingleton.PlayerController.enabled = false;
-            mainControllerSingleton.AILauncher.enabled = true;
+            TurnChangeValues(Turn.AI, aiSpawnPosition, false);
         }
         else // Optimize
         {
-            currentTurn = Turn.Player;
-            mainControllerSingleton.Ball.transform.position = playerSpawnPosition.position;
-            mainControllerSingleton.AILauncher.enabled = false;
-            mainControllerSingleton.PlayerController.enabled = true;
+            TurnChangeValues(Turn.Player, playerSpawnPosition, true);
         }
 
         Debug.Log(currentTurn.ToString());
 
     }
 
-    private IEnumerator DelayTurnChange()
+    private void TurnChangeValues(Turn turn, Transform spawnPosition, bool playerEnabled) //  Turn values will be set here
     {
-        yield return new WaitForSeconds(2);
-
+        currentTurn = turn;
+        mainControllerSingleton.Ball.transform.position = spawnPosition.position;
+        mainControllerSingleton.PlayerController.enabled = playerEnabled;
+        mainControllerSingleton.AILauncher.enabled = !playerEnabled;
     }
 
-    public enum Turn
+
+
+    public enum Turn 
     {
         Player,
         AI

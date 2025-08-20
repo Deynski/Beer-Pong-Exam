@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public float maxForce = 30f;        // Clamp max power
 
     [SerializeField] private bool isLaunched = false;
-    public bool IsLaunched => isLaunched;
+    public bool IsLaunched => isLaunched; // Check if ball is launched to record a single bounce
 
     private Vector3 dragStartPos;
     private Vector3 direction;
@@ -21,27 +21,32 @@ public class PlayerController : MonoBehaviour
     {
         if (isLaunched) return;
 
-        // Record drag start
-        if (Input.GetMouseButtonDown(0))
+        
+        if (!mainControllerSingleton.Ball.IsBouncedOnce) // Check if ball is already bounced
         {
-            dragStartPos = Camera.main.ScreenToWorldPoint(
-                new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane)
-            );
+            // Record drag start
+            if (Input.GetMouseButtonDown(0))
+            {
+                dragStartPos = Camera.main.ScreenToWorldPoint(
+                    new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane)
+                );
+            }
+
+            // Release Drag -> Launch
+            if (Input.GetMouseButtonUp(0))
+            {
+                Vector3 dragEndPos = Camera.main.ScreenToWorldPoint(
+                    new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane)
+                );
+
+                direction = dragStartPos - dragEndPos; // opposite of drag
+                dragDistance = direction.magnitude;    // distance controls power
+
+                LaunchBall();
+                isLaunched = true;
+            }
         }
 
-        // Release drag → launch
-        if (Input.GetMouseButtonUp(0))
-        {
-            Vector3 dragEndPos = Camera.main.ScreenToWorldPoint(
-                new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane)
-            );
-
-            direction = dragStartPos - dragEndPos; // opposite of drag
-            dragDistance = direction.magnitude;    // distance controls power
-
-            LaunchBall();
-            isLaunched = true;
-        }
     }
 
     void LaunchBall() // Optimize
@@ -71,6 +76,7 @@ public class PlayerController : MonoBehaviour
 
         launchVelocity += Vector3.up * verticalForce;
         ballRB.velocity = launchVelocity;
+
         isLaunched = false;
         mainControllerSingleton.Ball.BouncedOnce(true);
     }

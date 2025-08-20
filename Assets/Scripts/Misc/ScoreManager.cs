@@ -15,15 +15,18 @@ public class ScoreManager : MonoBehaviour
         cup.transform.parent.gameObject.SetActive(false);
         if (currentTurn == TurnManager.Turn.Player)
         {
-
             aiCups.Remove(cup);
             playerScore++;
         }
         else
         {
-
             playerCups.Remove(cup);
             aiScore++;
+        }
+
+        if (playerCups.Count == 0 || aiCups.Count == 0)
+        {
+            
         }
     }
 

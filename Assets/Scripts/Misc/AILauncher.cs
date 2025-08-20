@@ -9,40 +9,32 @@ public class AILauncher : MonoBehaviour
     public float maxForce = 30f;        // Clamp max power
 
     [SerializeField] private bool isLaunched = false;
-    public bool IsLaunched => isLaunched;
+    public bool IsLaunched => isLaunched; // Check if ball is launched to record a single bounce
 
     private Vector3 direction;
     [SerializeField] private float dragDistance;
 
     [Header("AI Settings")]
-    public float minDragDistance = 1f;
-    public float maxDragDistanceAI = 5f;
-    public float launchDelay = 2f; // seconds before AI launches
-
-
+    public float minDragDistance = 1f; // Min Drag value of AI 
+    public float maxDragDistanceAI = 5f; // Max Drag value of AI
+    public float launchDelay = 2f; // Timer before the AI launches
 
     private MainControllerSingleton mainControllerSingleton => MainControllerSingleton.Instance;
 
     private void OnEnable()
     {
-        // AI waits and then launches automatically
+        // AI waits and then launches automatically on enable
         Invoke(nameof(DecideLaunch), launchDelay);
-    }
-
-    private void FixedUpdate()
-    {
-        
-
     }
 
     void DecideLaunch()
     {
         if (isLaunched) return;
 
-        // AI "pretends" to drag: pick random direction & power
+        // AI pretends to drag 
         Vector3 randomDir = new Vector3(
             Random.Range(-0.6f, -0.5f), // throws to the left side of the board
-            Random.Range(0.2f, 1f), // mostly upward
+            Random.Range(0.2f, 0.7f), // mostly upward
             0f
         );
 
@@ -86,7 +78,6 @@ public class AILauncher : MonoBehaviour
         isLaunched = false;
 
         mainControllerSingleton.Ball.BouncedOnce(true);
-        //Invoke(nameof(DecideLaunch), launchDelay);
     }
 }
 

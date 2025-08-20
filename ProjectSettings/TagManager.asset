@@ -6,6 +6,10 @@ TagManager:
   tags:
   - table
   - wall
+  - PlayerCups
+  - AICups
+  - wall1
+  - wall2
   layers:
   - Default
   - TransparentFX
