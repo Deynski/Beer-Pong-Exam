@@ -5,7 +5,7 @@
 
 ## Controls
 
-Drag your mouse from Left to right to launch the ball.
+Click and Drag your mouse from Left to right to launch the ball.
 
 ## Objectives
 
