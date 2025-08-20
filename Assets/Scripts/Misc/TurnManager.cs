@@ -22,21 +22,30 @@ public class TurnManager : MonoBehaviour
     private void OnEnable()
     {
         Ball.onChangeTurn += ChangeTurn;
+        ScoreManager.onGameOver += DisablePlayers;
     }
-
     private void OnDisable()
     {
         Ball.onChangeTurn -= ChangeTurn;
+        ScoreManager.onGameOver -= DisablePlayers;
+    }
+
+    private void DisablePlayers()
+    {
+        Ball.onChangeTurn -= ChangeTurn; // unsubscribe to change turn
+        
+        mainControllerSingleton.AILauncher.enabled = false;
+        mainControllerSingleton.PlayerController.enabled = false;
     }
 
     private void ChangeTurn() // Change the turn of the game
     {
-        mainControllerSingleton.Ball.StopBall();
-        if (currentTurn == Turn.Player) 
+        mainControllerSingleton.Ball.StopBall(true);
+        if (currentTurn == Turn.Player)
         {
             TurnChangeValues(Turn.AI, aiSpawnPosition, false);
         }
-        else // Optimize
+        else
         {
             TurnChangeValues(Turn.Player, playerSpawnPosition, true);
         }
@@ -51,11 +60,11 @@ public class TurnManager : MonoBehaviour
         mainControllerSingleton.Ball.transform.position = spawnPosition.position;
         mainControllerSingleton.PlayerController.enabled = playerEnabled;
         mainControllerSingleton.AILauncher.enabled = !playerEnabled;
+        mainControllerSingleton.Ball.StopBall(false);
     }
 
 
-
-    public enum Turn 
+    public enum Turn
     {
         Player,
         AI

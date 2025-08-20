@@ -77,8 +77,9 @@ public class Ball : MonoBehaviour
         isBouncedOnce = bounced;
     }
 
-    public void StopBall()
+    public void StopBall(bool active)
     {
-        ballRigidbody.velocity = Vector3.zero;
+        ballRigidbody.isKinematic = active;
+
     }
 }

@@ -34,8 +34,8 @@ public class AILauncher : MonoBehaviour
         // AI pretends to drag 
         Vector3 randomDir = new Vector3(
             Random.Range(-0.6f, -0.5f), // throws to the left side of the board
-            Random.Range(0.2f, 0.7f), // mostly upward
-            0f
+            0f, // mostly upward
+            Random.Range(-0.3f, 0.3f)
         );
 
         direction = randomDir.normalized;
